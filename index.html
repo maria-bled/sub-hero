@@ -14,17 +14,17 @@
 <body>
 <!-- PRELOADER -->
 <div class="preloader" id="preloader">
-  <video
+ 
+<video
   class="preloader__video"
   src="images/proxy-video_online-video-cutter.com_compross.mp4"
   autoplay
   muted
-  playsinline
   loop
-  preload="auto"
+  playsinline
   webkit-playsinline
+  preload="auto"
 ></video>
-
   <div class="preloader__info">
     <span class="preloader__percent" id="preloader-percent">0%</span>
     <span class="preloader__label">Загрузка</span>
@@ -246,39 +246,28 @@
 (function () {
   var preloader = document.getElementById('preloader');
   var percentEl = document.getElementById('preloader-percent');
-  var video = preloader && preloader.querySelector('.preloader__video');
+  var video = document.querySelector('.preloader__video');
   if (!preloader || !percentEl) return;
 
-  // принудительно запускаем видео
+  // автозапуск видео
   if (video) {
     video.muted = true;
-    video.setAttribute('muted', '');
+    video.defaultMuted = true;
     video.playsInline = true;
 
     var tryPlay = function () {
-      var p = video.play();
-      if (p && typeof p.then === 'function') {
-        p.catch(function () {
-          // если заблокировали — пробуем ещё раз после клика/тача
-          var unlock = function () {
-            video.play();
-            document.removeEventListener('touchstart', unlock);
-            document.removeEventListener('click', unlock);
-          };
-          document.addEventListener('touchstart', unlock, { once: true });
-          document.addEventListener('click', unlock, { once: true });
-        });
-      }
+      video.play().catch(function () {
+        document.addEventListener('touchstart', function () {
+          video.play();
+        }, { once: true });
+      });
     };
 
-    if (video.readyState >= 2) {
-      tryPlay();
-    } else {
-      video.addEventListener('loadeddata', tryPlay, { once: true });
-      video.load();
-    }
+    video.addEventListener('loadeddata', tryPlay);
+    tryPlay();
   }
 
+  // проценты
   var value = 0;
   var done = false;
 
